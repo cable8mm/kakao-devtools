@@ -3,7 +3,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { buildDestination } from '../../src/browser/config.js';
 import { WsClient } from '../../src/browser/ws-client.js';
 import { startLogServerOrExit } from '../../src/core/run.js';
-import { type LogServer, resolvePort, startLogServer } from '../../src/core/server.js';
+import {
+  checkBindPolicy,
+  type LogServer,
+  resolvePort,
+  startLogServer,
+} from '../../src/core/server.js';
 import type { ServerMessage } from '../../src/shared/protocol.js';
 import { PROTOCOL_VERSION, WS_PORT_ENV } from '../../src/shared/protocol.js';
 
@@ -284,5 +289,95 @@ describe('startLogServerOrExit', () => {
     expect(lines.join('\n')).toMatch(new RegExp(`port ${port} is already in use.*${WS_PORT_ENV}`));
 
     await new Promise<void>((resolve) => blocker.close(() => resolve()));
+  });
+});
+
+describe('production guard', () => {
+  it('rejects a session in a production environment', async () => {
+    const server = await startServer({
+      token: TOKEN,
+      port: 0,
+      log: noop,
+      environment: 'production',
+    });
+    const socket = await connectRaw(server.url);
+    const replies = nextMessages(socket, 1);
+
+    socket.send(JSON.stringify(helloFrame));
+
+    await expect(replies).resolves.toEqual([{ type: 'reject', reason: 'disabled' }]);
+    socket.close();
+    expect(server.sessions.list()).toEqual([]);
+  });
+
+  it('accepts a session in production when the override is set', async () => {
+    const server = await startServer({
+      token: TOKEN,
+      port: 0,
+      log: noop,
+      environment: 'production',
+      allowProduction: true,
+    });
+    const socket = await connectRaw(server.url);
+    const replies = nextMessages(socket, 1);
+
+    socket.send(JSON.stringify(helloFrame));
+
+    await expect(replies).resolves.toEqual([{ type: 'welcome', ackSeq: 0 }]);
+    socket.close();
+  });
+
+  it('makes the snippet stop retrying when production refuses the session', async () => {
+    const server = await startServer({
+      token: TOKEN,
+      port: 0,
+      log: noop,
+      environment: 'production',
+    });
+    const client = createClient(server.port);
+    client.start();
+
+    await waitFor(() => client.state === 'rejected');
+    expect(server.sessions.list()).toEqual([]);
+  });
+});
+
+describe('checkBindPolicy', () => {
+  it('accepts loopback hosts silently', () => {
+    const lines: string[] = [];
+
+    expect(() =>
+      checkBindPolicy({
+        host: '127.0.0.1',
+        allowNonLoopback: false,
+        log: (line) => lines.push(line),
+      }),
+    ).not.toThrow();
+    expect(() =>
+      checkBindPolicy({ host: '::1', allowNonLoopback: false, log: (line) => lines.push(line) }),
+    ).not.toThrow();
+    expect(lines).toEqual([]);
+  });
+
+  it('refuses a non-loopback bind and says so on the diagnostic stream', () => {
+    const lines: string[] = [];
+
+    expect(() =>
+      checkBindPolicy({
+        host: '0.0.0.0',
+        allowNonLoopback: false,
+        log: (line) => lines.push(line),
+      }),
+    ).toThrow(/non-loopback host 0\.0\.0\.0/);
+    expect(lines.join('\n')).toMatch(/refusing to bind to non-loopback host/);
+  });
+
+  it('warns loudly when a non-loopback bind is explicitly allowed', () => {
+    const lines: string[] = [];
+
+    expect(() =>
+      checkBindPolicy({ host: '0.0.0.0', allowNonLoopback: true, log: (line) => lines.push(line) }),
+    ).not.toThrow();
+    expect(lines.join('\n')).toMatch(/without authentication/);
   });
 });

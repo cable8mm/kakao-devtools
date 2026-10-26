@@ -20,6 +20,40 @@ export interface LogServerOptions {
   limits?: StoreLimits;
   log?: (line: string) => void;
   now?: () => number;
+  environment?: string;
+  allowProduction?: boolean;
+  allowNonLoopback?: boolean;
+}
+
+export const ALLOW_PRODUCTION_ENV = 'KAKAO_DEVTOOLS_ALLOW_PRODUCTION';
+
+export function isLoopbackHost(host: string): boolean {
+  return host === 'localhost' || host === '::1' || host === '[::1]' || /^127\./.test(host);
+}
+
+/**
+ * Loopback is the default and is sufficient for tunnels. A non-loopback bind is
+ * refused unless it is requested explicitly (ARCHITECTURE.md section 6).
+ */
+export function checkBindPolicy(options: {
+  host: string;
+  allowNonLoopback: boolean;
+  log: (line: string) => void;
+}): void {
+  if (isLoopbackHost(options.host)) {
+    return;
+  }
+
+  if (!options.allowNonLoopback) {
+    options.log(`[kakao-devtools] refusing to bind to non-loopback host ${options.host}`);
+    throw new Error(
+      `Refusing to bind to non-loopback host ${options.host}. Tunnels forward to 127.0.0.1, so a non-loopback bind needs allowNonLoopback.`,
+    );
+  }
+
+  options.log(
+    `[kakao-devtools] warning: listening on non-loopback host ${options.host} without authentication`,
+  );
 }
 
 export interface LogServer {
@@ -105,6 +139,12 @@ export async function startLogServer(options: LogServerOptions): Promise<LogServ
   const sessions = new SessionRegistry();
   const log = options.log ?? ((line: string) => process.stderr.write(`${line}\n`));
   const now = options.now ?? Date.now;
+  const environment = options.environment ?? process.env.NODE_ENV ?? '';
+  const allowProduction =
+    options.allowProduction ?? (process.env[ALLOW_PRODUCTION_ENV] ?? '') !== '';
+  const isProduction = environment === 'production';
+
+  checkBindPolicy({ host, allowNonLoopback: options.allowNonLoopback ?? false, log });
 
   const wss = new WebSocketServer({ host, port, maxPayload: MAX_FRAME_BYTES });
 
@@ -170,6 +210,14 @@ export async function startLogServer(options: LogServerOptions): Promise<LogServ
         if (message.token !== options.token) {
           log('[kakao-devtools] rejected a session with a bad token');
           reject('bad_token');
+          return;
+        }
+
+        if (isProduction && !allowProduction) {
+          log(
+            `[kakao-devtools] refused a session in a production environment; set ${ALLOW_PRODUCTION_ENV} to override`,
+          );
+          reject('disabled');
           return;
         }
 

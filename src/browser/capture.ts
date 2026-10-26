@@ -99,14 +99,20 @@ export function installCapture(
     }
   };
 
-  target.addEventListener('error', onError as (event: never) => void);
-  target.addEventListener('unhandledrejection', onRejection as (event: never) => void);
+  const hasListeners = typeof target.addEventListener === 'function';
+
+  if (hasListeners) {
+    target.addEventListener('error', onError as (event: never) => void);
+    target.addEventListener('unhandledrejection', onRejection as (event: never) => void);
+  }
 
   return () => {
     for (const [level, original] of originals) {
       target.console[level] = original;
     }
-    target.removeEventListener('error', onError as (event: never) => void);
-    target.removeEventListener('unhandledrejection', onRejection as (event: never) => void);
+    if (hasListeners) {
+      target.removeEventListener('error', onError as (event: never) => void);
+      target.removeEventListener('unhandledrejection', onRejection as (event: never) => void);
+    }
   };
 }

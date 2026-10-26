@@ -110,6 +110,7 @@ describe('snippet pipeline in a desktop browser', () => {
     await page.waitForTimeout(500);
 
     expect(logServer.store.entries().length).toBe(before);
+    expect(await page.evaluate(() => String(console.log).includes('[native code]'))).toBe(true);
 
     await context.close();
   });
