@@ -68,7 +68,7 @@
     - The browser destination supports configured host, port and `ws`/`wss` scheme; unit tests cover destination construction and the receiver's default port 7890 plus a configured override.
     - Unit tests for the store, protocol validation and queue pass.
 
-- [ ] T-008 The Snippet activates only in the KakaoTalk in-app browser, only when enabled, and never in production
+- [x] T-008 The Snippet activates only in the KakaoTalk in-app browser, only when enabled, and never in production
   - Satisfies: PRODUCT_SPEC.md §7.1 (FR-2), §7.5 (FR-16), §8 (NFR-3)
   - External boundary: no
   - Acceptance criteria:
