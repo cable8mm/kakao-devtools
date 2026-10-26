@@ -158,7 +158,7 @@
     - Running init a second time does not overwrite an existing token.
     - Unit tests pass.
 
-- [ ] T-017 The Snippet works unchanged in a plain page and in a single-page application
+- [x] T-017 The Snippet works unchanged in a plain page and in a single-page application
   - Satisfies: PRODUCT_SPEC.md §8 (NFR-1)
   - External boundary: no
   - Acceptance criteria:
