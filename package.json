@@ -1,0 +1,63 @@
+{
+  "name": "kakao-devtools",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Debug the KakaoTalk in-app browser: in-app inspector, live logs, and MCP tools",
+  "license": "UNLICENSED",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@11.5.2",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./snippet": "./dist/browser/kakao-devtools.js"
+  },
+  "bin": {
+    "kakao-devtools-cli": "./dist/cli/bin.js",
+    "kakao-devtools-mcp": "./dist/mcp/bin.js"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "node scripts/build.mjs --typecheck",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "test": "vitest run",
+    "check": "biome check . && node scripts/build.mjs --typecheck && node scripts/build.mjs && vitest run",
+    "prepublishOnly": "node scripts/refuse-publish.mjs"
+  },
+  "peerDependencies": {
+    "express": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "express": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "eruda": "^3.4.3",
+    "ws": "^8.22.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "~2.4.16",
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.19.2",
+    "@types/ws": "^8.18.2",
+    "appium": "^3.8.0",
+    "esbuild": "^0.28.2",
+    "playwright": "^1.64.1",
+    "typescript": "^7.0.2",
+    "vitest": "~4.1.12",
+    "webdriverio": "^10.1.0"
+  }
+}

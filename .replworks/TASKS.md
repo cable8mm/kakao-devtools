@@ -1,6 +1,6 @@
 # kakao-devtools — TASKS
 
-- [ ] T-001 Project foundation
+- [x] T-001 Project foundation
   - Satisfies: PRODUCT_SPEC.md §8 (NFR-2, NFR-4)
   - External boundary: no
   - Acceptance criteria:
