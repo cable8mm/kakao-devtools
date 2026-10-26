@@ -148,7 +148,7 @@
     - An E2E test through the live in-app browser passes.
     - Unit tests pass.
 
-- [ ] T-016 CLI init scaffolds a working setup
+- [x] T-016 CLI init scaffolds a working setup
   - Satisfies: PRODUCT_SPEC.md §7.6 (FR-17), §7.5 (FR-14, FR-16)
   - External boundary: no
   - Acceptance criteria:
