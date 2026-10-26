@@ -6,6 +6,8 @@ export const WS_PORT_ENV = 'KAKAO_DEVTOOLS_WS_PORT';
 
 export type LogLevel = 'debug' | 'log' | 'info' | 'warn' | 'error';
 
+export type WsScheme = 'ws' | 'wss';
+
 export const LOG_LEVELS: readonly LogLevel[] = ['debug', 'log', 'info', 'warn', 'error'];
 
 export const MAX_FRAME_BYTES = 1_000_000;

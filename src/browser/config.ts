@@ -1,6 +1,6 @@
-import { DEFAULT_WS_HOST, DEFAULT_WS_PORT } from '../shared/protocol.js';
+import { DEFAULT_WS_HOST, DEFAULT_WS_PORT, type WsScheme } from '../shared/protocol.js';
 
-export type WsScheme = 'ws' | 'wss';
+export type { WsScheme };
 
 export interface WsDestinationConfig {
   host?: string;
