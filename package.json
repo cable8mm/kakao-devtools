@@ -32,7 +32,8 @@
     "format": "biome format --write .",
     "test": "vitest run",
     "check": "biome check . && node scripts/build.mjs --typecheck && node scripts/build.mjs && vitest run",
-    "prepublishOnly": "node scripts/refuse-publish.mjs"
+    "prepublishOnly": "node scripts/refuse-publish.mjs",
+    "test:e2e": "node scripts/build.mjs && vitest run --config vitest.config.e2e.ts"
   },
   "peerDependencies": {
     "express": "^5.0.0"

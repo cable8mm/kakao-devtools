@@ -56,7 +56,7 @@
     - Pass: the record states, for the unchanged URL and for the parameter-modified URL, whether the preview reflects the changed metadata.
     - The recorded observations are committed to the repository.
 
-- [ ] T-007 A log or error emitted by a page running the Snippet is retrievable from the Log server core
+- [x] T-007 A log or error emitted by a page running the Snippet is retrievable from the Log server core
   - Satisfies: PRODUCT_SPEC.md §7.5 (FR-12, FR-14), §3 (G3)
   - External boundary: no
   - Acceptance criteria:
