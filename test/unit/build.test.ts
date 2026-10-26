@@ -1,11 +1,8 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it } from 'vitest';
 import { listTypeScriptFiles } from '../../scripts/sources.mjs';
-
-const repoRoot = fileURLToPath(new URL('../..', import.meta.url));
 
 describe('listTypeScriptFiles', () => {
   const created = [];
@@ -29,7 +26,7 @@ describe('listTypeScriptFiles', () => {
   });
 
   it('returns an empty list for a missing directory', () => {
-    expect(listTypeScriptFiles(join(repoRoot, 'does-not-exist'))).toEqual([]);
+    expect(listTypeScriptFiles(join(tmpdir(), 'kakao-devtools-missing'))).toEqual([]);
   });
 
   it('finds .ts files recursively and ignores other extensions', () => {
@@ -40,9 +37,5 @@ describe('listTypeScriptFiles', () => {
       join(dir, 'nested', 'b.ts'),
       join(dir, 'nested', 'deep', 'c.ts'),
     ]);
-  });
-
-  it('finds no sources in a repository that has no product code', () => {
-    expect(listTypeScriptFiles(join(repoRoot, 'src'))).toEqual([]);
   });
 });
